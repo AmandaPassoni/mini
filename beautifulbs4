@@ -1,0 +1,61 @@
+from bs4 import BeautifulSoup
+
+# Função para obter o valor de um atributo dentro de uma tag
+def get_attribute_value(tag, attribute):
+    if tag.has_attr(attribute):
+        return tag[attribute]
+    return None
+
+# Função para imprimir as informações de uma tag
+def print_tag_info(tag, level):
+    tag_name = tag.name
+    print("Tag de abertura:", tag_name, ", Nível", level)
+
+    # Verifica se a tag possui atributos
+    if tag.attrs:
+        for attribute, value in tag.attrs.items():
+            if attribute == "style":
+                print("Atributo de Tag:", attribute)
+                styles = value.split(";")
+                for style in styles:
+                    if style:
+                        style_name, style_value = style.split(":")
+                        print("Conteúdo 1 do style:", style_name.strip())
+                        print("valor conteúdo 1:", style_value.strip())
+            else:
+                print("Atributo de Tag:", attribute)
+                print("valor atributo", attribute + ":", value)
+
+    # Verifica se a tag possui conteúdo
+    if tag.contents:
+        content = tag.contents[0]
+        if content.string:
+            print("conteúdo da tag:", content.string.strip())
+
+# Função para analisar as tags
+def analyze_tags(html, level=0):
+    soup = BeautifulSoup(html, 'html.parser')
+    tags = soup.find_all()
+
+    for tag in tags:
+        print_tag_info(tag, level)
+        if tag.contents:
+            analyze_tags(str(tag.contents[0]), level+1)
+
+        print("Tag de fechamento:", tag.name)
+
+# Código HTML de entrada
+html_code = '''
+<html>
+<head>
+<title>Compiladores</title>
+</head>
+<body>
+<p style="color:red;background:blue;" id="abc">Unipinhal</p>
+<br>
+</body>
+</html>
+'''
+
+# Chamada da função para analisar as tags
+analyze_tags(html_code)

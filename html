@@ -1,0 +1,72 @@
+import re
+
+class HTMLParser:
+    def __init__(self):
+        self.stack = []
+        self.indentation = 0
+
+    def extract_attributes(self, tag):
+        pattern = r'(\w+)\s*=\s*["\'](.*?)["\']'
+        attributes = re.findall(pattern, tag)
+        return attributes
+
+    def parse_line(self, line):
+        tags = re.findall(r'<\s*\/?\s*(\w+)', line)
+
+        for tag in tags:
+            if re.match(r'<\s*\/', line):  # Tag de fechamento
+                if self.stack:
+                    self.indentation -= 1
+                    self.print_tag('Tag de fechamento:', tag)
+                    self.stack.pop()
+            else:  # Tag de abertura
+                self.print_tag('Tag de abertura:', tag)
+                self.stack.append(tag)
+                self.indentation += 1
+
+                attributes = self.extract_attributes(line)
+                for attr, value in attributes:
+                    if attr == 'style':
+                        styles = value.split(';')
+                        for style in styles:
+                            if style.strip() != '':
+                                name, val = style.split(':')
+                                self.print_attribute('Atributo de Tag:', attr)
+                                self.print_attribute('Conteúdo 1 do style:', name.strip())
+                                self.print_attribute('valor conteúdo 1:', val.strip())
+                    else:
+                        self.print_attribute('Atributo de Tag:', attr)
+                        self.print_attribute('valor atributo', attr + ':', value)
+
+        content = re.findall(r'>(.*?)<', line)
+        for item in content:
+            if item.strip() != '':
+                self.print_tag('conteúdo da tag:', item)
+
+    def print_tag(self, tag_type, tag_name):
+        indentation_str = '  ' * self.indentation
+        print(indentation_str + tag_type, tag_name)
+
+    def print_attribute(self, attr_type, attr_name, attr_value=''):
+        indentation_str = '  ' * self.indentation
+        print(indentation_str + attr_type, attr_name, attr_value)
+
+    def parse_html(self, html):
+        lines = html.split('\n')
+
+        for line in lines:
+            self.parse_line(line)
+
+html_input = """
+<html>
+    <head>
+        <title>Compiladores</title>
+    </head>
+    <body>
+        <p style="color:red;background:blue;" id="abc">Unipinhal</p>
+        <br>
+    </body>
+</html>
+"""
+parser = HTMLParser()
+parser.parse_html(html_input)
