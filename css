@@ -1,0 +1,51 @@
+import re
+
+def reconhecer_tags(html):
+    regex_tag_abertura = r'<(\w+)([^>]*)>'
+    regex_tag_fechamento = r'</(\w+)>'
+    regex_atributos = r'(\w+)="([^"]*)"'
+    regex_conteudo_tag = r'>([^<]*)<'
+
+    nivel_atual = 0
+
+    for linha in html.split('\n'):
+        match_tag_abertura = re.match(regex_tag_abertura, linha)
+        match_tag_fechamento = re.match(regex_tag_fechamento, linha)
+        match_atributos = re.findall(regex_atributos, linha)
+        match_conteudo_tag = re.findall(regex_conteudo_tag, linha)
+
+        if match_tag_abertura:
+            nome_tag = match_tag_abertura.group(1)
+            atributos = match_atributos
+            conteudo_tag = match_conteudo_tag[0].strip() if match_conteudo_tag else ""
+
+            print(f"Tag de abertura: {nome_tag}, Nível {nivel_atual}")
+            nivel_atual += 1
+
+            for atributo, valor in atributos:
+                print(f"Atributo de Tag: {atributo}")
+                print(f"Valor atributo {atributo}: {valor}")
+
+            if conteudo_tag:
+                print(f"Conteúdo da tag: {conteudo_tag}")
+
+        if match_tag_fechamento:
+            nome_tag = match_tag_fechamento.group(1)
+            nivel_atual -= 1
+
+            print(f"Tag de fechamento: {nome_tag}")
+
+# Exemplo de uso
+html = '''
+<html>
+<head>
+<title>Compiladores</title>
+</head>
+<body>
+<p style="color:red;background:blue;" id="abc">Unipinhal</p>
+<br>
+</body>
+</html>
+'''
+
+reconhecer_tags(html)
